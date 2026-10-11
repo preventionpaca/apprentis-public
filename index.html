@@ -31,14 +31,49 @@
       const gas = 'https://script.google.com/macros/s/' +
         'AKfycby6ykCxTxhUjq8FeKoBzgEMj6xzdrjXnBFgOt-1pAw1GfkaAigWMH7jj0EIg_BWpEkmxg' +
         '/exec';
-      const target = new URL(gas);
-      const query = new URLSearchParams(location.search);
-      target.searchParams.set('page', 'apprentissage-public-pfmp');
-      ['annee', 'classe'].forEach(function (key) {
-        const value = query.get(key);
-        if (value) target.searchParams.set(key, value);
+      const frame = document.getElementById('app');
+      const allowedPages = {
+        'apprentissage-public-pfmp': true,
+        'cartographie-apprentis-public-pfmp': true
+      };
+      function allowed(raw) {
+        try {
+          const incoming = new URL(String(raw || ''));
+          const page = incoming.searchParams.get('page') || '';
+          if (incoming.protocol !== 'https:' || incoming.hostname !== 'script.google.com' || !allowedPages[page]) return null;
+          const target = new URL(gas);
+          incoming.searchParams.forEach(function (value, key) { target.searchParams.append(key, value); });
+          target.searchParams.set('wrapper', '1');
+          return target;
+        } catch (e) { return null; }
+      }
+      function initial() {
+        const target = new URL(gas);
+        const query = new URLSearchParams(location.search);
+        const page = query.get('page') || 'apprentissage-public-pfmp';
+        target.searchParams.set('page', allowedPages[page] ? page : 'apprentissage-public-pfmp');
+        ['annee', 'classe'].forEach(function (key) {
+          const value = query.get(key);
+          if (value) target.searchParams.set(key, value);
+        });
+        target.searchParams.set('wrapper', '1');
+        return target;
+      }
+      window.addEventListener('message', function (event) {
+        if (!event.data || !/^EUC_APPRENTIS_WRAPPER_/.test(String(event.data.type || ''))) return;
+        if (event.origin !== 'null' &&
+            !/^https:\/\/(?:[a-z0-9-]+-)?script\.googleusercontent\.com$/i.test(event.origin) &&
+            event.origin !== 'https://script.google.com') return;
+        if (event.data.type === 'EUC_APPRENTIS_WRAPPER_QUERY') {
+          try { event.source.postMessage({ type: 'EUC_APPRENTIS_WRAPPER_READY' }, '*'); } catch (e) {}
+          return;
+        }
+        if (event.data.type === 'EUC_APPRENTIS_WRAPPER_NAVIGATE') {
+          const target = allowed(event.data.url);
+          if (target) frame.src = target.toString();
+        }
       });
-      document.getElementById('app').src = target.toString();
+      frame.src = initial().toString();
     }());
   </script>
 </body>
