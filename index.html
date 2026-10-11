@@ -40,7 +40,9 @@
         try {
           const incoming = new URL(String(raw || ''));
           const page = incoming.searchParams.get('page') || '';
-          if (incoming.protocol !== 'https:' || incoming.hostname !== 'script.google.com' || !allowedPages[page]) return null;
+          if (incoming.protocol !== 'https:' ||
+              !(incoming.hostname === 'script.google.com' || /script\.googleusercontent\.com$/i.test(incoming.hostname)) ||
+              !allowedPages[page]) return null;
           const target = new URL(gas);
           incoming.searchParams.forEach(function (value, key) { target.searchParams.append(key, value); });
           target.searchParams.set('wrapper', '1');
