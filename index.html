@@ -32,6 +32,8 @@
         'AKfycby6ykCxTxhUjq8FeKoBzgEMj6xzdrjXnBFgOt-1pAw1GfkaAigWMH7jj0EIg_BWpEkmxg' +
         '/exec';
       const frame = document.getElementById('app');
+      /* Clé du lien Atrium : transmise à chaque page affichée dans le cadre. */
+      const acces = new URLSearchParams(location.search).get('acces') || '';
       const allowedPages = {
         'apprentissage-public-pfmp': true,
         'cartographie-apprentis-public-pfmp': true
@@ -45,6 +47,7 @@
               !allowedPages[page]) return null;
           const target = new URL(gas);
           incoming.searchParams.forEach(function (value, key) { target.searchParams.append(key, value); });
+          if (acces && !target.searchParams.has('acces')) target.searchParams.set('acces', acces);
           target.searchParams.set('wrapper', '1');
           return target;
         } catch (e) { return null; }
@@ -54,7 +57,7 @@
         const query = new URLSearchParams(location.search);
         const page = query.get('page') || 'apprentissage-public-pfmp';
         target.searchParams.set('page', allowedPages[page] ? page : 'apprentissage-public-pfmp');
-        ['annee', 'classe'].forEach(function (key) {
+        ['annee', 'classe', 'acces'].forEach(function (key) {
           const value = query.get(key);
           if (value) target.searchParams.set(key, value);
         });
