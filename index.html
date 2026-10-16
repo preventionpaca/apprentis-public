@@ -59,8 +59,10 @@
       function initial() {
         const target = new URL(gas);
         const query = new URLSearchParams(location.search);
-        const page = query.get('page') || 'apprentissage-public-pfmp';
-        target.searchParams.set('page', allowedPages[page] ? page : 'apprentissage-public-pfmp');
+        /* Nouveau suivi des apprentis par défaut ; l'ancienne page y mène aussi. */
+        let page = query.get('page') || 'suivi-apprentis-enseignants';
+        if (!allowedPages[page] || page === 'apprentissage-public-pfmp') page = 'suivi-apprentis-enseignants';
+        target.searchParams.set('page', page);
         ['annee', 'classe', 'acces', 'jeton'].forEach(function (key) {
           const value = query.get(key);
           if (value) target.searchParams.set(key, value);
