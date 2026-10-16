@@ -73,7 +73,7 @@
         return target;
       }
       window.addEventListener('message', function (event) {
-        if (!event.data || !/^EUC_APPRENTIS_WRAPPER_/.test(String(event.data.type || ''))) return;
+        if (!event.data || !/^EUC_(?:APPRENTIS|PFMP)_WRAPPER_/.test(String(event.data.type || ''))) return;
         if (event.origin !== 'null' &&
             !/^https:\/\/(?:[a-z0-9-]+-)?script\.googleusercontent\.com$/i.test(event.origin) &&
             event.origin !== 'https://script.google.com') return;
@@ -81,7 +81,8 @@
           try { event.source.postMessage({ type: 'EUC_APPRENTIS_WRAPPER_READY' }, '*'); } catch (e) {}
           return;
         }
-        if (event.data.type === 'EUC_APPRENTIS_WRAPPER_NAVIGATE') {
+        /* Le nouveau suivi des apprentis (même code que celui des PFMP) envoie EUC_PFMP_WRAPPER_NAVIGATE. */
+        if (event.data.type === 'EUC_APPRENTIS_WRAPPER_NAVIGATE' || event.data.type === 'EUC_PFMP_WRAPPER_NAVIGATE') {
           const target = allowed(event.data.url);
           if (target) frame.src = target.toString();
         }
