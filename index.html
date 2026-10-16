@@ -55,6 +55,7 @@
           return target;
         } catch (e) { return null; }
       }
+      function eucOrigine(){try{var d=sessionStorage.getItem('eucOrigine');if(d!==null)return null;var o='';try{o=document.referrer?new URL(document.referrer).hostname:'';}catch(e){}sessionStorage.setItem('eucOrigine',o||'-');return o;}catch(e){return null;}}
       function initial() {
         const target = new URL(gas);
         const query = new URLSearchParams(location.search);
@@ -65,6 +66,8 @@
           if (value) target.searchParams.set(key, value);
         });
         target.searchParams.set('wrapper', '1');
+        /* Observation : origine du clic (ex. atrium-sud.fr), transmise une fois par onglet. */
+        const o = eucOrigine(); if (o !== null) target.searchParams.set('orig', o);
         return target;
       }
       window.addEventListener('message', function (event) {
